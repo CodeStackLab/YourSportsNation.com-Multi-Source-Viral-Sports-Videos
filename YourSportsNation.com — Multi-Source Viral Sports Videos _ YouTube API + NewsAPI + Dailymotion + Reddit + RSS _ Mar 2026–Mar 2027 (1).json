@@ -1,0 +1,895 @@
+{
+  "name": "YourSportsNation.com — Multi-Source Viral Sports Videos | YouTube API + NewsAPI + Dailymotion + Reddit + RSS | Mar 2026–Mar 2027",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "f15d55be-2c92-4076-8f52-b889e883aa56",
+      "name": "8AM Daily",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 14 * * *"
+            }
+          ]
+        }
+      },
+      "id": "a2e14088-0002-40fa-bb0c-8e20b1c29a2c",
+      "name": "2PM Daily",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 20 * * *"
+            }
+          ]
+        }
+      },
+      "id": "91287419-31b0-4b56-9119-9264b2f21d8e",
+      "name": "8PM Daily",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        1472
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════\n// VSN — Pick Source & Query  (v6 — 100% sports only)\n// ═══════════════════════════════════════════════════\nconst gd = $getWorkflowStaticData('global');\nfunction load(k){ try{ return JSON.parse(gd[k]||'[]'); }catch(e){ return []; } }\n\nconst YT_KEY   = 'AIzaSyAiN1RUEukMcMiAeu4y7ej9NbqJqex5FRM';\nconst NEWS_KEY = 'd7cbe6c28e5144a181bef663cf597c24';\n\nconst YT_Q = [\n  { q:'premier league goals highlights 2025',         sport:'soccer',  label:'Soccer'   },\n  { q:'champions league match highlights 2025',       sport:'soccer',  label:'Soccer'   },\n  { q:'la liga best goals barcelona real madrid',     sport:'soccer',  label:'Soccer'   },\n  { q:'serie a bundesliga mls goals 2025',            sport:'soccer',  label:'Soccer'   },\n  { q:'world cup qualifier goals 2025',               sport:'soccer',  label:'Soccer'   },\n  { q:'nba highlights top plays dunks 2025',          sport:'nba',     label:'NBA'      },\n  { q:'nba playoffs best moments game 2025',          sport:'nba',     label:'NBA'      },\n  { q:'lebron james curry nba game highlights',       sport:'nba',     label:'NBA'      },\n  { q:'nfl touchdowns best plays week highlights',    sport:'nfl',     label:'NFL'      },\n  { q:'super bowl nfl game highlights 2025',          sport:'nfl',     label:'NFL'      },\n  { q:'ipl 2025 match highlights sixes wickets',      sport:'cricket', label:'Cricket'  },\n  { q:'india pakistan cricket highlights 2025',       sport:'cricket', label:'Cricket'  },\n  { q:'t20 cricket best sixes wickets 2025',          sport:'cricket', label:'Cricket'  },\n  { q:'icc world cup cricket match 2025',             sport:'cricket', label:'Cricket'  },\n  { q:'formula 1 race highlights overtakes 2025',     sport:'f1',      label:'Formula 1'},\n  { q:'f1 grand prix qualifying pole 2025',           sport:'f1',      label:'Formula 1'},\n  { q:'ufc fight highlights knockout 2025',           sport:'mma',     label:'MMA/UFC'  },\n  { q:'boxing match knockout highlights 2025',        sport:'mma',     label:'Boxing'   },\n  { q:'wimbledon us open tennis highlights 2025',     sport:'tennis',  label:'Tennis'   },\n  { q:'alcaraz djokovic tennis match highlights',     sport:'tennis',  label:'Tennis'   },\n  { q:'masters pga tour golf highlights 2025',        sport:'golf',    label:'Golf'     },\n  { q:'six nations rugby tries highlights 2025',      sport:'rugby',   label:'Rugby'    },\n  { q:'nhl goals playoffs highlights 2025',           sport:'nhl',     label:'NHL'      },\n  { q:'stanley cup nhl highlights 2025',              sport:'nhl',     label:'NHL'      },\n];\n\nconst NEWS_Q = [\n  { q:'\"premier league\" OR \"champions league\" goal video highlight', sport:'soccer',  label:'Soccer'   },\n  { q:'\"NBA\" basketball game highlight video 2025',                  sport:'nba',     label:'NBA'      },\n  { q:'\"IPL\" OR \"cricket\" match highlight video 2025',               sport:'cricket', label:'Cricket'  },\n  { q:'\"NFL\" football touchdown highlight video',                    sport:'nfl',     label:'NFL'      },\n  { q:'\"Formula 1\" OR \"F1\" race video highlight 2025',               sport:'f1',      label:'Formula 1'},\n  { q:'\"UFC\" OR \"MMA\" fight video knockout 2025',                    sport:'mma',     label:'MMA'      },\n  { q:'\"Wimbledon\" OR \"tennis\" match video highlight 2025',          sport:'tennis',  label:'Tennis'   },\n  { q:'\"Masters\" OR \"PGA\" golf highlight video 2025',                sport:'golf',    label:'Golf'     },\n];\n\nconst DM_Q = [\n  { q:'premier league goals highlights 2025',  sport:'soccer',  label:'Soccer'   },\n  { q:'champions league match highlights',     sport:'soccer',  label:'Soccer'   },\n  { q:'nba game highlights dunks 2025',        sport:'nba',     label:'NBA'      },\n  { q:'ipl cricket match highlights 2025',     sport:'cricket', label:'Cricket'  },\n  { q:'formula 1 race highlights 2025',        sport:'f1',      label:'Formula 1'},\n  { q:'ufc fight knockout mma 2025',           sport:'mma',     label:'MMA/UFC'  },\n  { q:'tennis grand slam highlights 2025',     sport:'tennis',  label:'Tennis'   },\n  { q:'nfl football highlights 2025',          sport:'nfl',     label:'NFL'      },\n  { q:'rugby six nations tries 2025',          sport:'rugby',   label:'Rugby'    },\n  { q:'nhl hockey goals playoffs 2025',        sport:'nhl',     label:'NHL'      },\n];\n\nconst RD_SUBS = [\n  { sub:'soccer',        sport:'soccer',   label:'Soccer'    },\n  { sub:'nba',           sport:'nba',      label:'NBA'       },\n  { sub:'nfl',           sport:'nfl',      label:'NFL'       },\n  { sub:'Cricket',       sport:'cricket',  label:'Cricket'   },\n  { sub:'tennis',        sport:'tennis',   label:'Tennis'    },\n  { sub:'formula1',      sport:'f1',       label:'Formula 1' },\n  { sub:'MMA',           sport:'mma',      label:'MMA'       },\n  { sub:'hockey',        sport:'nhl',      label:'NHL'       },\n  { sub:'golf',          sport:'golf',     label:'Golf'      },\n  { sub:'rugbyunion',    sport:'rugby',    label:'Rugby'     },\n  { sub:'PremierLeague', sport:'soccer',   label:'Soccer'    },\n];\n\nconst YT_CH = [\n  { id:'UCnUYZLuoy1rq1aVMwx4aTzw', name:'UEFA Champions League', sport:'soccer',  label:'Soccer'    },\n  { id:'UC_t5SBLbbDcAoXqyY3L4okA', name:'Premier League',        sport:'soccer',  label:'Soccer'    },\n  { id:'UCVdLSMoO9nDGZmCPJ7RUSKQ', name:'LaLiga',                sport:'soccer',  label:'Soccer'    },\n  { id:'UCWJ2lWNubArHWmf3FIHbfcQ', name:'NBA',                   sport:'nba',     label:'NBA'       },\n  { id:'UCB4UFXEX88dOmHU0RwrmUSA', name:'NFL',                   sport:'nfl',     label:'NFL'       },\n  { id:'UCiZwDyDMUKNViKWaGaqr9rg', name:'ICC Cricket',           sport:'cricket', label:'Cricket'   },\n  { id:'UCib-3p7sJQFsHbJBGtMvPCQ', name:'BCCI',                  sport:'cricket', label:'Cricket'   },\n  { id:'UCB_qr75-ydFVKSF9Dmo6izg', name:'Formula 1',             sport:'f1',      label:'Formula 1' },\n  { id:'UCvgfXK3ejTFPsz7NRuZPCEw', name:'UFC',                   sport:'mma',     label:'MMA/UFC'   },\n  { id:'UCaP8bvKEAJDV0NXRJ8XFUQ', name:'ATP Tennis',             sport:'tennis',  label:'Tennis'    },\n  { id:'UC8p-cKppKwXSnqSbDFPiGkA', name:'PGA Tour',              sport:'golf',    label:'Golf'      },\n  { id:'UCiRiQGCHGjDLT9FQXFW0I3A', name:'NHL',                   sport:'nhl',     label:'NHL'       },\n];\n\nconst GN_Q = [\n  { q:'premier league soccer goals highlights video',  sport:'soccer',  label:'Soccer'    },\n  { q:'nba basketball game highlights video 2025',     sport:'nba',     label:'NBA'       },\n  { q:'ipl cricket match highlights video 2025',       sport:'cricket', label:'Cricket'   },\n  { q:'formula 1 race video highlights 2025',          sport:'f1',      label:'Formula 1' },\n  { q:'ufc mma fight knockout video 2025',             sport:'mma',     label:'MMA'       },\n  { q:'tennis wimbledon highlights video 2025',        sport:'tennis',  label:'Tennis'    },\n  { q:'nfl touchdown highlights video 2025',           sport:'nfl',     label:'NFL'       },\n  { q:'golf masters pga highlights video 2025',        sport:'golf',    label:'Golf'      },\n];\n\nconst SOURCES = ['youtube_api','newsapi','dailymotion','reddit','yt_rss','google_news'];\nlet queue = load('VSN_queue');\nif (!queue.length) {\n  const a = [...SOURCES];\n  for (let i = a.length-1; i > 0; i--) {\n    const j = Math.floor(Math.random()*(i+1));\n    [a[i],a[j]] = [a[j],a[i]];\n  }\n  queue = a;\n  console.log('🔀 New queue: ' + queue.join(' > '));\n}\nconst source = queue.shift();\ngd['VSN_queue'] = JSON.stringify(queue);\ngd['VSN_src']   = source;\n\nfunction pick(arr, key) {\n  let used  = load(key);\n  let avail = arr.filter((_,i) => !used.includes(i));\n  if (!avail.length) { used = []; avail = arr; }\n  const sh = a => { const r=[...a]; for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; };\n  const item = sh(avail)[0];\n  const idx  = arr.indexOf(item);\n  used.push(idx);\n  if (used.length > arr.length) used = [];\n  gd[key] = JSON.stringify(used);\n  return item;\n}\n\nlet out = { source, YT_KEY, NEWS_KEY };\n\nif (source === 'youtube_api') {\n  const q = pick(YT_Q, 'VSN_yt_q');\n  out = { ...out, ...q, fetchUrl: `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q.q)}&type=video&videoCategoryId=17&videoEmbeddable=true&order=viewCount&maxResults=15&publishedAfter=2024-01-01T00:00:00Z&key=${YT_KEY}` };\n} else if (source === 'newsapi') {\n  const q = pick(NEWS_Q, 'VSN_news_q');\n  out = { ...out, ...q, fetchUrl: `https://newsapi.org/v2/everything?q=${encodeURIComponent(q.q)}&language=en&sortBy=publishedAt&pageSize=20&apiKey=${NEWS_KEY}` };\n} else if (source === 'dailymotion') {\n  const q = pick(DM_Q, 'VSN_dm_q');\n  out = { ...out, ...q, fetchUrl: `https://api.dailymotion.com/videos?search=${encodeURIComponent(q.q)}&fields=id,title,thumbnail_url,views_total,duration,channel&limit=15&sort=visited&channel=sport` };\n} else if (source === 'reddit') {\n  const s = pick(RD_SUBS, 'VSN_rd_sub');\n  out = { ...out, ...s, fetchUrl: `https://www.reddit.com/r/${s.sub}/top.json?limit=25&t=day` };\n} else if (source === 'yt_rss') {\n  const c = pick(YT_CH, 'VSN_rss_ch');\n  out = { ...out, ...c, fetchUrl: `https://www.youtube.com/feeds/videos.xml?channel_id=${c.id}` };\n} else {\n  const q = pick(GN_Q, 'VSN_gn_q');\n  out = { ...out, ...q, fetchUrl: `https://news.google.com/rss/search?q=${encodeURIComponent(q.q)}&hl=en-US&gl=US&ceid=US:en` };\n}\n\nconsole.log(`▶ VSN | ${source.toUpperCase()} | ${out.q||out.sub||out.name} | ${out.sport}`);\nreturn [{ json: out }];"
+      },
+      "id": "9038be8c-0e52-404e-bbe6-2f55e8fa6aa2",
+      "name": "Pick Source & Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        1184
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.source }}",
+                    "operation": "equals",
+                    "value2": "youtube_api"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "yt_api"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.source }}",
+                    "operation": "equals",
+                    "value2": "newsapi"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "newsapi"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.source }}",
+                    "operation": "equals",
+                    "value2": "dailymotion"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "dailymotion"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.source }}",
+                    "operation": "equals",
+                    "value2": "reddit"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "reddit"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.source }}",
+                    "operation": "equals",
+                    "value2": "yt_rss"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "yt_rss"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.source }}",
+                    "operation": "equals",
+                    "value2": "google_news"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "google_news"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c39aa591-ad65-49a9-b182-4d2deb7f0043",
+      "name": "Route to Source",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        816,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.fetchUrl }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "aec53c9d-8de5-47b2-8ce4-4c59adee65fb",
+      "name": "Fetch YouTube API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        528
+      ],
+      "continueOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.fetchUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "YourSportsNation/1.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "6febaae7-7f66-40dd-a6b3-59cc7787a244",
+      "name": "Fetch NewsAPI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        720
+      ],
+      "continueOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.fetchUrl }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "97315bf7-9e20-49f0-902a-9ed8a8cb327d",
+      "name": "Fetch Dailymotion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        912
+      ],
+      "continueOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.fetchUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "YourSportsNation/1.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "83e4c9ff-8800-4f1b-8ad9-1b259ec4a9d7",
+      "name": "Fetch Reddit JSON",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        1104
+      ],
+      "continueOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.fetchUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (compatible; VSNBot/1.0)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "0307eb12-8174-49c2-8ab9-1476ef23b182",
+      "name": "Fetch YouTube RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        1296
+      ],
+      "continueOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.fetchUrl }}",
+        "options": {}
+      },
+      "id": "dc2f3f17-fdd9-4ea5-a174-aeac0807fc90",
+      "name": "Fetch Google News RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        1488
+      ],
+      "continueOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const gd = $getWorkflowStaticData('global');\nfunction load(k){ try{ return JSON.parse(gd[k]||'[]'); }catch(e){ return []; } }\nconst meta = $('Pick Source & Query').first().json;\nconst used = load('VSN_used');\nconst SPORTS_KW = ['goal','goals','match','game','highlight','highlights','league','cup','champion','final','player','team','nba','nfl','nhl','ufc','mma','cricket','ipl','tennis','golf','f1','formula','premier','bundesliga','soccer','football','basketball','rugby','wimbledon','masters','playoff','knockout','wicket','touchdown','grand prix','championship','tournament','sprint','season','transfer','score','penalty','dunk','slam','overtime','innings','pitch'];\nfunction isSports(t, ch) { const s = (t + ' ' + ch).toLowerCase(); return SPORTS_KW.some(kw => s.includes(kw)); }\nconst items = $json.items || [];\nif (!items.length) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'yt_no_results', source: meta.source } }]; }\nconst videos = [];\nfor (const item of items) { const ytId = item.id?.videoId || ''; if (!ytId || used.includes(ytId)) continue; const sn = item.snippet || {}; const title = (sn.title||'').replace(/&amp;/g,'&').replace(/&#39;/g,\"'\").replace(/&quot;/g,'\"').trim(); const ch = sn.channelTitle || ''; if (!isSports(title, ch)) { console.log('⛔ Not sports: ' + title.substring(0,50)); continue; } const thumb = sn.thumbnails?.maxres?.url || sn.thumbnails?.high?.url || `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`; videos.push({ youtubeId:ytId, title, thumbnail:thumb, channelName:ch, publishedAt: sn.publishedAt||new Date().toISOString(), viewsFmt:'', duration:'', sport:meta.sport, sportLabel:meta.label, isViral:true, source:'youtube_api' }); }\nif (!videos.length) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'yt_no_sports', source: meta.source } }]; }\nconst v = videos[0];\nused.push(v.youtubeId);\nif (used.length > 800) used.splice(0, 300);\ngd['VSN_used'] = JSON.stringify(used);\nconsole.log(`✅ YT API [${meta.sport}]: ${v.title.substring(0,55)}`);\nreturn [{ json: { ...v, _ok: 'true' } }];"
+      },
+      "id": "4c10a0d5-8644-4840-9a27-85bd8100f94a",
+      "name": "Parse YouTube API",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const gd = $getWorkflowStaticData('global');\nfunction load(k){ try{ return JSON.parse(gd[k]||'[]'); }catch(e){ return []; } }\nconst meta = $('Pick Source & Query').first().json;\nconst used = load('VSN_used');\nfunction getYtId(text) { if (!text) return ''; const m = text.match(/(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/|youtube\\.com\\/shorts\\/)([-\\w]{11})/); return m ? m[1] : ''; }\nconst SPORTS_KW = ['goal','match','game','highlight','league','cup','player','team','nba','nfl','nhl','ufc','mma','cricket','tennis','golf','f1','formula','soccer','football','basketball','rugby','wimbledon','masters','playoff','knockout','wicket','touchdown','grand prix','ipl'];\nfunction isSports(t) { const s = t.toLowerCase(); return SPORTS_KW.some(kw => s.includes(kw)); }\nconst articles = $json.articles || [];\nif (!articles.length) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'news_no_results', source: meta.source } }]; }\nconst found = [];\nfor (const a of articles) { const all = (a.title||'') + (a.url||'') + (a.description||'') + (a.content||''); const ytId = getYtId(all); if (!ytId || used.includes(ytId)) continue; if (!isSports(a.title||'')) continue; const thumb = (a.urlToImage||'').startsWith('http') ? a.urlToImage : `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`; found.push({ youtubeId:ytId, title:(a.title||'Sports Video').substring(0,150), thumbnail: thumb, channelName: a.source?.name||'NewsAPI', publishedAt: a.publishedAt||new Date().toISOString(), viewsFmt:'Trending', duration:'', sport:meta.sport, sportLabel:meta.label, isViral:true, source:'newsapi' }); }\nif (!found.length) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'news_no_yt', source: meta.source } }]; }\nconst v = found[0];\nused.push(v.youtubeId);\nif (used.length > 800) used.splice(0, 300);\ngd['VSN_used'] = JSON.stringify(used);\nconsole.log(`✅ NewsAPI [${meta.sport}]: ${v.title.substring(0,55)}`);\nreturn [{ json: { ...v, _ok: 'true' } }];"
+      },
+      "id": "64db38db-735c-4307-b9b1-0bf71fa1a33c",
+      "name": "Parse NewsAPI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const gd = $getWorkflowStaticData('global');\nfunction load(k){ try{ return JSON.parse(gd[k]||'[]'); }catch(e){ return []; } }\nconst meta = $('Pick Source & Query').first().json;\nconst used = load('VSN_used');\nfunction fmt(n){ if(!n)return''; if(n>=1e6)return(n/1e6).toFixed(1)+'M'; if(n>=1e3)return(n/1e3).toFixed(1)+'K'; return String(n); }\nfunction dur(s){ if(!s)return''; const m=Math.floor(s/60); const sc=s%60; return m+':'+String(sc).padStart(2,'0'); }\nconst items = $json.list || $json.data || [];\nif (!items.length) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'dm_no_results', source: meta.source } }]; }\nconst found = [];\nfor (const v of items) { const dmId = v.id || ''; if (!dmId || used.includes('dm_'+dmId)) continue; const views = parseInt(v.views_total||'0'); found.push({ youtubeId: '', dailymotionId: dmId, dmEmbedUrl: `https://www.dailymotion.com/embed/video/${dmId}?autoplay=0&rel=0`, dmWatchUrl: `https://www.dailymotion.com/video/${dmId}`, title: (v.title||'Sports Video').substring(0,150), thumbnail: v.thumbnail_url || `https://www.dailymotion.com/thumbnail/video/${dmId}`, channelName: v.channel || 'Dailymotion Sports', publishedAt: new Date().toISOString(), viewCount: views, viewsFmt: fmt(views), duration: dur(parseInt(v.duration||'0')), sport: meta.sport, sportLabel: meta.label, isViral: views > 50000, source: 'dailymotion' }); }\nfound.sort((a,b) => b.viewCount - a.viewCount);\nif (!found.length) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'dm_all_used', source: meta.source } }]; }\nconst v = found[0];\nused.push('dm_' + v.dailymotionId);\nif (used.length > 800) used.splice(0, 300);\ngd['VSN_used'] = JSON.stringify(used);\nconsole.log(`✅ Dailymotion [${meta.sport}]: ${v.title.substring(0,55)}`);\nreturn [{ json: { ...v, _ok: 'true' } }];"
+      },
+      "id": "b2a26577-03ab-4336-84e0-7b6924cb25fd",
+      "name": "Parse Dailymotion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const gd = $getWorkflowStaticData('global');\nfunction load(k){ try{ return JSON.parse(gd[k]||'[]'); }catch(e){ return []; } }\nconst meta = $('Pick Source & Query').first().json;\nconst used = load('VSN_used');\nfunction getYtId(url) { if (!url) return ''; const m = url.match(/(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/|youtube\\.com\\/shorts\\/|youtube\\.com\\/embed\\/|youtube\\.com\\/live\\/)([-\\w]{11})/); return m ? m[1] : ''; }\nfunction fmt(n){ if(n>=1e6)return(n/1e6).toFixed(1)+'M'; if(n>=1e3)return(n/1e3).toFixed(1)+'K'; return String(n)+' pts'; }\nconst posts = (($json.data && $json.data.children)||[]).map(c => c.data);\nif (!posts.length) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'reddit_empty', source: meta.source } }]; }\nconst found = [];\nfor (const p of posts) { if (p.is_self) continue; const urls = [p.url||'', p.secure_media?.oembed?.url||'', p.url_overridden_by_dest||'']; let ytId = ''; for (const u of urls) { ytId = getYtId(u); if (ytId) break; } if (!ytId || used.includes(ytId)) continue; const score = p.score || 0; found.push({ youtubeId: ytId, title: (p.title||'Sports Video').substring(0,150), thumbnail: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`, channelName: `r/${meta.sub}`, publishedAt: new Date((p.created_utc||Date.now()/1000)*1000).toISOString(), viewCount: score, viewsFmt: fmt(score), duration: '', sport: meta.sport, sportLabel: meta.label, isViral: score > 200, source: 'reddit' }); }\nfound.sort((a,b) => b.viewCount - a.viewCount);\nif (!found.length) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'reddit_no_yt', source: meta.source } }]; }\nconst v = found[0];\nused.push(v.youtubeId);\nif (used.length > 800) used.splice(0, 300);\ngd['VSN_used'] = JSON.stringify(used);\nconsole.log(`✅ Reddit r/${meta.sub} [${meta.sport}]: ${v.title.substring(0,50)}`);\nreturn [{ json: { ...v, _ok: 'true' } }];"
+      },
+      "id": "790abd79-3eed-46e3-a6b7-da7b9d9efd1c",
+      "name": "Parse Reddit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const gd = $getWorkflowStaticData('global');\nfunction load(k){ try{ return JSON.parse(gd[k]||'[]'); }catch(e){ return []; } }\nconst meta = $('Pick Source & Query').first().json;\nconst used = load('VSN_used');\nlet raw = '';\ntry { if (typeof $json.data === 'string') raw = $json.data; else if (typeof $json.body === 'string') raw = $json.body; else raw = JSON.stringify($json); } catch(e) { raw = ''; }\nif (!raw || raw.length < 200) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'rss_empty', source: meta.source } }]; }\nfunction fmt(n){ if(n>=1e6)return(n/1e6).toFixed(1)+'M'; if(n>=1e3)return(n/1e3).toFixed(1)+'K'; return n>0?String(n):'New'; }\nconst entries = raw.split('<entry>').slice(1);\nconst videos  = [];\nfor (const e of entries) { const ytId = (e.match(/<yt:videoId>([\\w-]+)<\\/yt:videoId>/)||[])[1]||''; const title = (e.match(/<title>([^<]+)<\\/title>/)||[])[1]||''; const pub = (e.match(/<published>([^<]+)<\\/published>/)||[])[1]||''; const thumb = (e.match(/<media:thumbnail url=\"([^\"]+)\"/)||[])[1] || `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`; const views = parseInt((e.match(/<media:statistics views=\"(\\d+)\"/)||[])[1]||'0'); if (!ytId || used.includes(ytId) || !title || title.length < 3) continue; videos.push({ youtubeId: ytId, title: title.replace(/&amp;/g,'&').replace(/&#39;/g,\"'\").trim(), thumbnail: thumb, channelName: meta.name||'', publishedAt: pub, viewCount: views, viewsFmt: fmt(views), duration: '', sport: meta.sport, sportLabel: meta.label, isViral: views > 100000, source: 'yt_rss' }); }\nvideos.sort((a,b) => b.viewCount - a.viewCount);\nif (!videos.length) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'rss_no_new', source: meta.source } }]; }\nconst v = videos[0];\nused.push(v.youtubeId);\nif (used.length > 800) used.splice(0, 300);\ngd['VSN_used'] = JSON.stringify(used);\nconsole.log(`✅ YT RSS (${meta.name}) [${meta.sport}]: ${v.title.substring(0,50)}`);\nreturn [{ json: { ...v, _ok: 'true' } }];"
+      },
+      "id": "6faa1300-0761-4337-b679-92f08163f1d8",
+      "name": "Parse YouTube RSS",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        1296
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const gd = $getWorkflowStaticData('global');\nfunction load(k){ try{ return JSON.parse(gd[k]||'[]'); }catch(e){ return []; } }\nconst meta = $('Pick Source & Query').first().json;\nconst used = load('VSN_used');\nfunction getYtId(t) { if (!t) return ''; const m = t.match(/(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/|youtube\\.com\\/shorts\\/)([-\\w]{11})/); return m ? m[1] : ''; }\nconst items = $input.all().map(i => i.json);\nif (!items.length) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'gn_empty', source: meta.source } }]; }\nconst found = [];\nfor (const item of items) { const all = (item.title||'') + (item.link||'') + (item.content||'') + (item.contentSnippet||''); const ytId = getYtId(all); if (!ytId || used.includes(ytId)) continue; found.push({ youtubeId: ytId, title: (item.title||'Sports Video').replace(/<[^>]+>/g,'').substring(0,150), thumbnail: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`, channelName: item.author||'Google News', publishedAt: item.pubDate||new Date().toISOString(), viewsFmt: 'Trending', duration: '', sport: meta.sport, sportLabel: meta.label, isViral: true, source: 'google_news' }); }\nif (!found.length) { gd['VSN_retry'] = '1'; return [{ json: { _ok: 'false', reason: 'gn_no_yt', source: meta.source } }]; }\nconst v = found[0];\nused.push(v.youtubeId);\nif (used.length > 800) used.splice(0, 300);\ngd['VSN_used'] = JSON.stringify(used);\nconsole.log(`✅ Google News [${meta.sport}]: ${v.title.substring(0,50)}`);\nreturn [{ json: { ...v, _ok: 'true' } }];"
+      },
+      "id": "cec240b3-c1e9-4e72-b3bf-3ad8b4f6405b",
+      "name": "Parse Google News",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        1488
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "703fd2bb-0266-4b1b-9b67-931071687f69",
+      "name": "Merge All Sources",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        1488,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json._ok }}",
+              "value2": "true"
+            }
+          ]
+        }
+      },
+      "id": "aa224717-4982-4d39-8dd0-13c0c4a23714",
+      "name": "Video Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const gd = $getWorkflowStaticData('global');\nconst reason = $json.reason || 'unknown';\nconst failed = $json.source || '?';\nlet cnt = parseInt(gd['VSN_retries']||'0') + 1;\ngd['VSN_retries'] = String(cnt);\nif (cnt >= 6) {\n  console.log('⚠️ 6 retries done — resetting all caches');\n  ['VSN_used','VSN_yt_q','VSN_news_q','VSN_dm_q','VSN_rd_sub','VSN_rss_ch','VSN_gn_q','VSN_queue'].forEach(k => gd[k]='[]');\n  gd['VSN_retries'] = '0';\n}\nconsole.log(`🔄 Retry #${cnt} | ${failed} | ${reason}`);\nreturn [{ json: { _retry: true, cnt, failed, reason } }];"
+      },
+      "id": "bf315635-d025-475a-8693-f65c53baf057",
+      "name": "Retry Next Source",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        1584
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const gd = $getWorkflowStaticData('global');\ngd['VSN_retries'] = '0';\nconst v = $json;\nconst EMOJI = {soccer:'⚽',nba:'🏀',nfl:'🏈',cricket:'🏏',tennis:'🎾',f1:'🏎️',mma:'🥊',boxing:'🥊',golf:'⛳',nhl:'🏒',hockey:'🏒',rugby:'🏉',baseball:'⚾',sports:'🏆'};\nconst emoji = EMOJI[v.sport] || '🏆';\nconst embedUrl = v.dailymotionId ? v.dmEmbedUrl : (v.youtubeId ? `https://www.youtube.com/embed/${v.youtubeId}?rel=0&modestbranding=1` : '');\nconst watchUrl = v.dailymotionId ? v.dmWatchUrl : (v.youtubeId ? `https://youtu.be/${v.youtubeId}` : '');\nconst thumbUrl = v.thumbnail ? v.thumbnail : (v.youtubeId ? `https://img.youtube.com/vi/${v.youtubeId}/hqdefault.jpg` : '');\nif (!embedUrl || !thumbUrl) { console.log('⚠️ Missing embedUrl or thumbUrl — skipping'); return [{ json: { _ok: 'false', _skip: true, reason: 'no_embed', title: v.title } }]; }\nconst postTitle  = emoji + ' ' + (v.title || 'Sports Video');\nconst cleanTitle = (v.title||'sports video').toLowerCase().replace(/[^a-z0-9\\s]/g,'').replace(/\\s+/g,'-').replace(/-+/g,'-');\nconst slug       = `${v.sport||'sports'}-${cleanTitle}`.split('-').slice(0,8).join('-');\nconst excerpt    = `Watch ${v.sportLabel||'sports'} highlights — ${(v.title||'').substring(0,70)}. YourSportsNation.com.`;\nconsole.log(`📦 ${postTitle.substring(0,55)}`);\nreturn [{ json: { ...v, _embedUrl: embedUrl, _watchUrl: watchUrl, _thumbUrl: thumbUrl, _postTitle: postTitle, _postSlug: slug, _postExcerpt: excerpt, title: postTitle, sport: v.sport||'sports', sportLabel: v.sportLabel||v.label||'Sports', label: v.sportLabel||v.label||'Sports', youtubeId: v.youtubeId||'', dailymotionId: v.dailymotionId||'', dmEmbedUrl: v.dmEmbedUrl||'', dmWatchUrl: v.dmWatchUrl||'', thumbnail: thumbUrl, viewsFmt: v.viewsFmt||'', duration: v.duration||'', isViral: v.isViral||false, source: v.source||'youtube_api', channelName: v.channelName||'', publishedAt: v.publishedAt||new Date().toISOString() } }];"
+      },
+      "id": "a6b93513-2333-4329-a623-f4ae0788376a",
+      "name": "Build Post Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json._embedUrl }}",
+              "operation": "notEqual"
+            }
+          ]
+        }
+      },
+      "id": "cdbcede0-71e9-4d51-9f6e-ac3f5c5ae04a",
+      "name": "Has Embed URL?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json._thumbUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "thumbData"
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "5b8c05d8-b890-4347-ab1d-39d471f6b9b7",
+      "name": "Download Thumbnail",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2384,
+        576
+      ],
+      "continueOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://yoursportsnation.com/wp-json/wp/v2/media",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Basic ZGV2OnVvNHljQzBtMjNqdjUxN1EwWXlrV2w1eA=="
+            },
+            {
+              "name": "Content-Disposition",
+              "value": "={{ 'attachment; filename=\"vsn-' + ($('Build Post Content').first().json.youtubeId || $('Build Post Content').first().json.dailymotionId || Date.now()) + '.jpg\"' }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "image/jpeg"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "thumbData",
+        "options": {
+          "timeout": 25000
+        }
+      },
+      "id": "56ef371a-c6c5-422e-9060-f6616d9bb31e",
+      "name": "Upload Thumbnail",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2608,
+        576
+      ],
+      "continueOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Build Post Content').first().json;\nconst res  = $json;\nconst mid  = (res && res.id && !isNaN(parseInt(res.id))) ? parseInt(res.id) : 0;\nif (mid) console.log('✅ Thumb WP ID: ' + mid);\nelse     console.log('⚠️ Thumb upload failed — continuing without image');\nreturn [{ json: { ...prev, featured_media: mid, _featuredMediaId: mid } }];"
+      },
+      "id": "80ca3848-b67b-41ed-91d0-50822f8178f4",
+      "name": "Attach Media ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2832,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://yoursportsnation.com/wp-json/vsn/v1/video",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Basic ZGV2OnVvNHljQzBtMjNqdjUxN1EwWXlrV2w1eA=="
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "3244238c-c504-47db-9298-7ab20510e345",
+      "name": "Publish to VSN Plugin",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3056,
+        576
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "continueOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Attach Media ID').first().json;\nconst wr   = $json;\nconst gd   = $getWorkflowStaticData('global');\nconst tot  = parseInt(gd['VSN_total']||'0') + 1;\ngd['VSN_total'] = String(tot);\nif (wr && wr.id) {\n  console.log('════════════════════════════════');\n  console.log('✅ PUBLISHED: ' + (prev.title||'').substring(0,50));\n  console.log('   Sport  : ' + prev.sportLabel);\n  console.log('   Source : ' + prev.source);\n  console.log('   WP ID  : ' + wr.id);\n  console.log('   URL    : ' + (wr.link||'?'));\n  console.log('   Total  : ' + tot);\n  console.log('════════════════════════════════');\n} else {\n  console.log('⚠️ Publish response: ' + JSON.stringify(wr).substring(0,200));\n}\nreturn [{ json: { done:true, id:wr.id||null, url:wr.link||null, sport:prev.sportLabel, source:prev.source, total:tot } }];"
+      },
+      "id": "4c13e547-368a-4370-9db8-85eef6039582",
+      "name": "Log Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3280,
+        576
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "8AM Daily": {
+      "main": [
+        [
+          {
+            "node": "Pick Source & Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2PM Daily": {
+      "main": [
+        [
+          {
+            "node": "Pick Source & Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "8PM Daily": {
+      "main": [
+        [
+          {
+            "node": "Pick Source & Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Source & Query": {
+      "main": [
+        [
+          {
+            "node": "Route to Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route to Source": {
+      "main": [
+        [
+          {
+            "node": "Fetch YouTube API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch NewsAPI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Dailymotion",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Reddit JSON",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch YouTube RSS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Google News RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch YouTube API": {
+      "main": [
+        [
+          {
+            "node": "Parse YouTube API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch NewsAPI": {
+      "main": [
+        [
+          {
+            "node": "Parse NewsAPI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Dailymotion": {
+      "main": [
+        [
+          {
+            "node": "Parse Dailymotion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Reddit JSON": {
+      "main": [
+        [
+          {
+            "node": "Parse Reddit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch YouTube RSS": {
+      "main": [
+        [
+          {
+            "node": "Parse YouTube RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Google News RSS": {
+      "main": [
+        [
+          {
+            "node": "Parse Google News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse YouTube API": {
+      "main": [
+        [
+          {
+            "node": "Merge All Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse NewsAPI": {
+      "main": [
+        [
+          {
+            "node": "Merge All Sources",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge All Sources": {
+      "main": [
+        [
+          {
+            "node": "Video Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Found?": {
+      "main": [
+        [
+          {
+            "node": "Build Post Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retry Next Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retry Next Source": {
+      "main": [
+        [
+          {
+            "node": "Pick Source & Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Post Content": {
+      "main": [
+        [
+          {
+            "node": "Has Embed URL?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Embed URL?": {
+      "main": [
+        [
+          {
+            "node": "Download Thumbnail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Thumbnail": {
+      "main": [
+        [
+          {
+            "node": "Upload Thumbnail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Thumbnail": {
+      "main": [
+        [
+          {
+            "node": "Attach Media ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Media ID": {
+      "main": [
+        [
+          {
+            "node": "Publish to VSN Plugin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish to VSN Plugin": {
+      "main": [
+        [
+          {
+            "node": "Log Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3c60292d-3af4-4921-8fa5-2d03678c558e",
+  "meta": {
+    "instanceId": "548ecc8c8b66354542236271705c5fba15257bfeeb6a0590df013e77efa360fb"
+  },
+  "id": "rihRhNrW6IMgO0Ix",
+  "tags": []
+}
